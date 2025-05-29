@@ -1,7 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { supabase } from "@/lib/supabase"
+import { useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -14,33 +13,336 @@ import {
   MapPin,
   Search,
   Users,
+  Award,
+  ArrowRight,
   TrendingUp,
   Briefcase,
   UserCheck,
   Target,
 } from "lucide-react"
 
-interface Startup {
-  id: string
-  name: string
-  description: string
-  industry: string
-  stage: string
-  team_size: number
-  location: string
-  website?: string
-  logo?: string
-  founded?: number
-  tags: string[]
-  status: string
-  revenue_growth?: string
-  testimonial?: string
-  mentor?: string
-  progress_update?: string
-  nomination_reason?: string
-  created_at: string
-  updated_at: string
-}
+const startups = [
+  // Alumni Companies
+  {
+    id: 1,
+    name: "PayFlow Nigeria",
+    description:
+      "Digital payment platform enabling seamless transactions for small businesses across Nigeria with mobile money integration.",
+    industry: "FinTech",
+    stage: "Pre-Seed",
+    teamSize: 12,
+    location: "Lagos, Nigeria",
+    website: "https://payflow.ng",
+    logo: "/placeholder.svg?height=60&width=60",
+    founded: 2022,
+    tags: ["Payments", "Mobile Money", "SME"],
+    programs: [
+      {
+        type: "Incubator",
+        cohort: "Fall 2022",
+        status: "Completed",
+        startDate: "September 2022",
+        graduationDate: "February 2023",
+        preStage: "Idea",
+        postStage: "MVP",
+      },
+      {
+        type: "Accelerator",
+        cohort: "Spring 2023",
+        status: "Completed",
+        startDate: "March 2023",
+        graduationDate: "August 2023",
+        preStage: "MVP",
+        postStage: "Pre-Seed",
+      },
+    ],
+    currentProgram: null,
+    status: "Alumni",
+    revenueGrowth: "400%",
+    testimonial:
+      "The hub's mentorship and network helped us navigate Nigeria's regulatory landscape and scale across 3 states.",
+    mentor: "Adebayo Ogunlesi, Former GTBank Executive",
+  },
+  {
+    id: 2,
+    name: "AgriConnect",
+    description:
+      "Connecting smallholder farmers directly with buyers and providing access to modern farming techniques and microfinance.",
+    industry: "AgriTech",
+    stage: "Pre-Seed",
+    teamSize: 15,
+    location: "Abuja, Nigeria",
+    website: "https://agriconnect.ng",
+    logo: "/placeholder.svg?height=60&width=60",
+    founded: 2023,
+    tags: ["Agriculture", "Marketplace", "Microfinance"],
+    programs: [
+      {
+        type: "Incubator",
+        cohort: "Fall 2023",
+        status: "Completed",
+        startDate: "September 2023",
+        graduationDate: "March 2024",
+        preStage: "Prototype",
+        postStage: "Pre-Seed",
+      },
+    ],
+    currentProgram: null,
+    status: "Alumni",
+    revenueGrowth: "250%",
+    testimonial:
+      "The hub connected us with key stakeholders in Nigeria's agricultural value chain and helped us reach 5,000+ farmers.",
+    mentor: "Dr. Funmi Adebayo, Agricultural Development Expert",
+  },
+  {
+    id: 3,
+    name: "HealthCare Plus",
+    description:
+      "Telemedicine platform providing affordable healthcare access to underserved communities across Nigeria.",
+    industry: "HealthTech",
+    stage: "Pre-Seed",
+    teamSize: 18,
+    location: "Port Harcourt, Nigeria",
+    website: "https://healthcareplus.ng",
+    logo: "/placeholder.svg?height=60&width=60",
+    founded: 2021,
+    tags: ["Telemedicine", "Rural Health", "Accessibility"],
+    programs: [
+      {
+        type: "Incubator",
+        cohort: "Summer 2021",
+        status: "Completed",
+        startDate: "June 2021",
+        graduationDate: "December 2021",
+        preStage: "Idea",
+        postStage: "MVP",
+      },
+      {
+        type: "Accelerator",
+        cohort: "Winter 2022",
+        status: "Completed",
+        startDate: "January 2022",
+        graduationDate: "June 2022",
+        preStage: "MVP",
+        postStage: "Pre-Seed",
+      },
+    ],
+    currentProgram: null,
+    status: "Alumni",
+    revenueGrowth: "600%",
+    testimonial:
+      "The hub's healthcare network helped us partner with NHIS and expand to rural communities in 6 states.",
+    mentor: "Dr. Kemi Odukoya, Public Health Specialist",
+  },
+  {
+    id: 4,
+    name: "EduNaija",
+    description:
+      "Digital learning platform providing quality education content in local languages for Nigerian students.",
+    industry: "EdTech",
+    stage: "Pre-Seed",
+    teamSize: 10,
+    location: "Kano, Nigeria",
+    website: "https://edunaija.com",
+    logo: "/placeholder.svg?height=60&width=60",
+    founded: 2023,
+    tags: ["Education", "Local Languages", "K-12"],
+    programs: [
+      {
+        type: "Incubator",
+        cohort: "Spring 2024",
+        status: "Completed",
+        startDate: "March 2024",
+        graduationDate: "September 2024",
+        preStage: "Concept",
+        postStage: "Pre-Seed",
+      },
+    ],
+    currentProgram: null,
+    status: "Alumni",
+    revenueGrowth: "180%",
+    testimonial: "From concept to serving 10,000+ students across Northern Nigeria - the hub made it possible.",
+    mentor: "Prof. Ibrahim Garba, Education Technology Researcher",
+  },
+  // Current Participants
+  {
+    id: 5,
+    name: "LogiMove",
+    description:
+      "Last-mile delivery platform optimizing logistics for e-commerce and traditional businesses across Nigerian cities.",
+    industry: "LogiTech",
+    stage: "Pre-Seed",
+    teamSize: 8,
+    location: "Ibadan, Nigeria",
+    website: "https://logimove.ng",
+    logo: "/placeholder.svg?height=60&width=60",
+    founded: 2024,
+    tags: ["Logistics", "E-commerce", "Last-mile"],
+    programs: [
+      {
+        type: "Incubator",
+        cohort: "Summer 2024",
+        status: "Completed",
+        startDate: "June 2024",
+        graduationDate: "December 2024",
+        preStage: "Idea",
+        postStage: "MVP",
+      },
+    ],
+    currentProgram: {
+      type: "Accelerator",
+      cohort: "Winter 2025",
+      status: "Current",
+      startDate: "January 2025",
+      expectedGraduation: "June 2025",
+      preStage: "MVP",
+      currentStage: "Pre-Seed",
+    },
+    status: "Current",
+    progressUpdate: "Completed pilot in Lagos and Ibadan, onboarded 200+ delivery partners.",
+    mentor: "Chidi Okwu, Former Jumia Logistics Head",
+  },
+  {
+    id: 6,
+    name: "CleanEnergy Solutions",
+    description:
+      "Solar energy solutions for homes and small businesses, addressing Nigeria's power challenges with affordable renewable energy.",
+    industry: "CleanTech",
+    stage: "Pre-Seed",
+    teamSize: 12,
+    location: "Enugu, Nigeria",
+    website: "https://cleanenergy.ng",
+    logo: "/placeholder.svg?height=60&width=60",
+    founded: 2024,
+    tags: ["Solar", "Renewable Energy", "Power"],
+    programs: [],
+    currentProgram: {
+      type: "Incubator",
+      cohort: "Winter 2025",
+      status: "Current",
+      startDate: "December 2024",
+      expectedGraduation: "June 2025",
+      preStage: "Idea",
+      currentStage: "Pre-Seed",
+    },
+    status: "Current",
+    progressUpdate: "Installed solar systems in 50+ homes, developing pay-as-you-go model.",
+    mentor: "Eng. Tunde Salihu, Renewable Energy Consultant",
+  },
+  // Nominated Companies
+  {
+    id: 7,
+    name: "SecureNaija",
+    description:
+      "Cybersecurity platform protecting Nigerian businesses from digital threats with AI-powered threat detection.",
+    industry: "CyberSecurity",
+    stage: "Pre-Seed",
+    teamSize: 6,
+    location: "Lagos, Nigeria",
+    website: "https://securenaija.com",
+    logo: "/placeholder.svg?height=60&width=60",
+    founded: 2024,
+    tags: ["Cybersecurity", "AI", "Business Protection"],
+    programs: [],
+    currentProgram: {
+      type: "Accelerator",
+      cohort: "Spring 2025",
+      status: "Nominated",
+      startDate: "March 2025",
+      expectedGraduation: "August 2025",
+      preStage: "Prototype",
+      currentStage: "Pre-Seed",
+    },
+    status: "Nominated",
+    nominationReason:
+      "Strong technical team addressing critical cybersecurity needs of Nigerian businesses with innovative AI approach.",
+    mentor: "TBD",
+  },
+  {
+    id: 8,
+    name: "WasteToWealth",
+    description:
+      "Converting plastic waste into valuable products while creating jobs and addressing Nigeria's waste management challenges.",
+    industry: "Sustainability",
+    stage: "Pre-Seed",
+    teamSize: 9,
+    location: "Kaduna, Nigeria",
+    website: "https://wastetowealth.ng",
+    logo: "/placeholder.svg?height=60&width=60",
+    founded: 2024,
+    tags: ["Waste Management", "Recycling", "Circular Economy"],
+    programs: [],
+    currentProgram: {
+      type: "Incubator",
+      cohort: "Spring 2025",
+      status: "Nominated",
+      startDate: "February 2025",
+      expectedGraduation: "August 2025",
+      preStage: "Prototype",
+      currentStage: "Pre-Seed",
+    },
+    status: "Nominated",
+    nominationReason:
+      "Addressing critical environmental challenge while creating economic opportunities for local communities.",
+    mentor: "TBD",
+  },
+  {
+    id: 9,
+    name: "MedSupply Chain",
+    description:
+      "Pharmaceutical supply chain platform ensuring authentic medicines reach patients across Nigeria's healthcare system.",
+    industry: "HealthTech",
+    stage: "Pre-Seed",
+    teamSize: 7,
+    location: "Abuja, Nigeria",
+    website: "https://medsupplychain.ng",
+    logo: "/placeholder.svg?height=60&width=60",
+    founded: 2024,
+    tags: ["Pharmaceuticals", "Supply Chain", "Drug Authentication"],
+    programs: [],
+    currentProgram: {
+      type: "Incubator",
+      cohort: "Spring 2025",
+      status: "Nominated",
+      startDate: "February 2025",
+      expectedGraduation: "August 2025",
+      preStage: "Research",
+      currentStage: "Pre-Seed",
+    },
+    status: "Nominated",
+    nominationReason:
+      "Tackling counterfeit drug problem with blockchain technology and strong partnerships with NAFDAC.",
+    mentor: "TBD",
+  },
+  {
+    id: 10,
+    name: "SkillUp Nigeria",
+    description:
+      "Digital skills training platform preparing Nigerian youth for the global digital economy with industry-relevant courses.",
+    industry: "EdTech",
+    stage: "Pre-Seed",
+    teamSize: 8,
+    location: "Calabar, Nigeria",
+    website: "https://skillupnigeria.com",
+    logo: "/placeholder.svg?height=60&width=60",
+    founded: 2024,
+    tags: ["Skills Training", "Youth Development", "Digital Economy"],
+    programs: [],
+    currentProgram: {
+      type: "Accelerator",
+      cohort: "Spring 2025",
+      status: "Nominated",
+      startDate: "March 2025",
+      expectedGraduation: "August 2025",
+      preStage: "Beta",
+      currentStage: "Pre-Seed",
+    },
+    status: "Nominated",
+    nominationReason:
+      "Addressing Nigeria's digital skills gap with comprehensive training programs and strong industry partnerships.",
+    mentor: "TBD",
+  },
+]
 
 const industries = [
   "All",
@@ -54,31 +356,17 @@ const industries = [
   "Sustainability",
 ]
 const stages = ["All", "Pre-Seed"]
+const programs = ["All", "Incubator", "Accelerator", "Multiple Programs"]
+const cohorts = ["All", "Winter 2022", "Fall 2022", "Spring 2023", "Fall 2023", "Spring 2024", "Summer 2024"]
 const statuses = ["All", "Alumni", "Current", "Nominated"]
 
 export function StartupPortfolio() {
-  const [startups, setStartups] = useState<Startup[]>([])
-  const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedIndustry, setSelectedIndustry] = useState("All")
   const [selectedStage, setSelectedStage] = useState("All")
+  const [selectedProgram, setSelectedProgram] = useState("All")
+  const [selectedCohort, setSelectedCohort] = useState("All")
   const [selectedStatus, setSelectedStatus] = useState("All")
-
-  useEffect(() => {
-    fetchStartups()
-  }, [])
-
-  const fetchStartups = async () => {
-    setLoading(true)
-    const { data, error } = await supabase.from("startups").select("*").order("created_at", { ascending: false })
-
-    if (error) {
-      console.error("Error fetching startups:", error)
-    } else {
-      setStartups(data || [])
-    }
-    setLoading(false)
-  }
 
   const filteredStartups = startups.filter((startup) => {
     const matchesSearch =
@@ -87,28 +375,32 @@ export function StartupPortfolio() {
       startup.tags.some((tag) => tag.toLowerCase().includes(searchTerm.toLowerCase()))
     const matchesIndustry = selectedIndustry === "All" || startup.industry === selectedIndustry
     const matchesStage = selectedStage === "All" || startup.stage === selectedStage
+
+    // Program matching logic
+    const matchesProgram =
+      selectedProgram === "All" ||
+      (selectedProgram === "Multiple Programs" &&
+        ((startup.programs && startup.programs.length > 0 && startup.currentProgram) ||
+          (startup.programs && startup.programs.length > 1))) ||
+      (selectedProgram !== "Multiple Programs" &&
+        ((startup.currentProgram && startup.currentProgram.type === selectedProgram) ||
+          (startup.programs && startup.programs.some((p) => p.type === selectedProgram))))
+
+    // Cohort matching logic
+    const matchesCohort =
+      selectedCohort === "All" ||
+      (startup.currentProgram && startup.currentProgram.cohort === selectedCohort) ||
+      (startup.programs && startup.programs.some((p) => p.cohort === selectedCohort))
+
     const matchesStatus = selectedStatus === "All" || startup.status === selectedStatus
 
-    return matchesSearch && matchesIndustry && matchesStage && matchesStatus
+    return matchesSearch && matchesIndustry && matchesStage && matchesProgram && matchesCohort && matchesStatus
   })
 
-  const stats = {
-    alumni: startups.filter((s) => s.status === "Alumni").length,
-    current: startups.filter((s) => s.status === "Current").length,
-    nominated: startups.filter((s) => s.status === "Nominated").length,
-    total: startups.length,
-  }
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#00ff00] mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading startup portfolio...</p>
-        </div>
-      </div>
-    )
-  }
+  const totalTeamMembers = startups.reduce((sum, startup) => sum + startup.teamSize, 0)
+  const multiProgramStartups = startups.filter(
+    (s) => (s.programs && s.programs.length > 0 && s.currentProgram) || (s.programs && s.programs.length > 1),
+  ).length
 
   return (
     <div className="min-h-screen bg-white">
@@ -170,7 +462,9 @@ export function StartupPortfolio() {
               <div className="inline-flex items-center justify-center w-16 h-16 bg-[#00ff00] bg-opacity-10 rounded-full mb-4">
                 <TrendingUp className="h-8 w-8 text-[#00ff00]" />
               </div>
-              <div className="text-3xl font-bold text-[#1a2332] mb-2">{stats.alumni}</div>
+              <div className="text-3xl font-bold text-[#1a2332] mb-2">
+                {startups.filter((s) => s.status === "Alumni").length}
+              </div>
               <div className="text-gray-600 font-medium">Alumni Companies</div>
               <div className="text-sm text-gray-500 mt-1">Successfully graduated</div>
             </div>
@@ -178,7 +472,9 @@ export function StartupPortfolio() {
               <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-500 bg-opacity-10 rounded-full mb-4">
                 <Briefcase className="h-8 w-8 text-blue-500" />
               </div>
-              <div className="text-3xl font-bold text-[#1a2332] mb-2">{stats.current}</div>
+              <div className="text-3xl font-bold text-[#1a2332] mb-2">
+                {startups.filter((s) => s.status === "Current").length}
+              </div>
               <div className="text-gray-600 font-medium">Current Participants</div>
               <div className="text-sm text-gray-500 mt-1">Actively building</div>
             </div>
@@ -186,7 +482,9 @@ export function StartupPortfolio() {
               <div className="inline-flex items-center justify-center w-16 h-16 bg-amber-500 bg-opacity-10 rounded-full mb-4">
                 <Target className="h-8 w-8 text-amber-500" />
               </div>
-              <div className="text-3xl font-bold text-[#1a2332] mb-2">{stats.nominated}</div>
+              <div className="text-3xl font-bold text-[#1a2332] mb-2">
+                {startups.filter((s) => s.status === "Nominated").length}
+              </div>
               <div className="text-gray-600 font-medium">Nominated Startups</div>
               <div className="text-sm text-gray-500 mt-1">Ready to start</div>
             </div>
@@ -194,9 +492,9 @@ export function StartupPortfolio() {
               <div className="inline-flex items-center justify-center w-16 h-16 bg-purple-500 bg-opacity-10 rounded-full mb-4">
                 <UserCheck className="h-8 w-8 text-purple-500" />
               </div>
-              <div className="text-3xl font-bold text-[#1a2332] mb-2">{stats.total}</div>
-              <div className="text-gray-600 font-medium">Total Startups</div>
-              <div className="text-sm text-gray-500 mt-1">In our ecosystem</div>
+              <div className="text-3xl font-bold text-[#1a2332] mb-2">{multiProgramStartups}</div>
+              <div className="text-gray-600 font-medium">Multi-Program</div>
+              <div className="text-sm text-gray-500 mt-1">Advanced through both programs</div>
             </div>
           </div>
         </div>
@@ -228,6 +526,18 @@ export function StartupPortfolio() {
                   ))}
                 </SelectContent>
               </Select>
+              <Select value={selectedProgram} onValueChange={setSelectedProgram}>
+                <SelectTrigger className="w-40 border-gray-300 focus:border-[#00ff00] focus:ring-[#00ff00]">
+                  <SelectValue placeholder="Program" />
+                </SelectTrigger>
+                <SelectContent>
+                  {programs.map((program) => (
+                    <SelectItem key={program} value={program}>
+                      {program}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <Select value={selectedStage} onValueChange={setSelectedStage}>
                 <SelectTrigger className="w-40 border-gray-300 focus:border-[#00ff00] focus:ring-[#00ff00]">
                   <SelectValue placeholder="Stage" />
@@ -236,6 +546,18 @@ export function StartupPortfolio() {
                   {stages.map((stage) => (
                     <SelectItem key={stage} value={stage}>
                       {stage}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={selectedCohort} onValueChange={setSelectedCohort}>
+                <SelectTrigger className="w-40 border-gray-300 focus:border-[#00ff00] focus:ring-[#00ff00]">
+                  <SelectValue placeholder="Cohort" />
+                </SelectTrigger>
+                <SelectContent>
+                  {cohorts.map((cohort) => (
+                    <SelectItem key={cohort} value={cohort}>
+                      {cohort}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -267,7 +589,7 @@ export function StartupPortfolio() {
                   <div className="flex items-start justify-between">
                     <div className="flex items-center space-x-3">
                       <img
-                        src={startup.logo || "/placeholder.svg?height=60&width=60"}
+                        src={startup.logo || "/placeholder.svg"}
                         alt={`${startup.name} logo`}
                         className="w-12 h-12 rounded-lg border border-gray-200"
                       />
@@ -301,6 +623,13 @@ export function StartupPortfolio() {
                       >
                         {startup.status}
                       </Badge>
+                      {((startup.programs && startup.programs.length > 0 && startup.currentProgram) ||
+                        (startup.programs && startup.programs.length > 1)) && (
+                        <Badge className="bg-[#00ff00] text-black hover:bg-[#00dd00]">
+                          <Award className="h-3 w-3 mr-1" />
+                          Multi-Program
+                        </Badge>
+                      )}
                     </div>
                   </div>
                 </CardHeader>
@@ -308,6 +637,59 @@ export function StartupPortfolio() {
                   <CardDescription className="mb-4 line-clamp-3 text-gray-600">{startup.description}</CardDescription>
 
                   <div className="space-y-3">
+                    {/* Program Journey */}
+                    {((startup.programs && startup.programs.length > 0) || startup.currentProgram) && (
+                      <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
+                        <h4 className="text-sm font-semibold mb-2 flex items-center text-[#1a2332]">
+                          <Award className="h-4 w-4 mr-1 text-[#00ff00]" />
+                          Program Journey
+                        </h4>
+                        <div className="space-y-2">
+                          {startup.programs &&
+                            startup.programs.map((program, idx) => (
+                              <div key={idx} className="flex items-center text-xs">
+                                <Badge
+                                  variant={program.type === "Accelerator" ? "default" : "secondary"}
+                                  className={`mr-2 ${
+                                    program.type === "Accelerator"
+                                      ? "bg-[#1a2332] text-white"
+                                      : "bg-gray-200 text-gray-700"
+                                  }`}
+                                >
+                                  {program.type}
+                                </Badge>
+                                <span className="text-gray-600">{program.cohort}</span>
+                                <ArrowRight className="h-3 w-3 mx-2 text-gray-400" />
+                                <Badge variant="outline" className="text-xs border-gray-300 text-gray-700">
+                                  {program.preStage} → {program.postStage}
+                                </Badge>
+                              </div>
+                            ))}
+
+                          {startup.currentProgram && (
+                            <div className="flex items-center text-xs">
+                              <Badge
+                                variant={startup.currentProgram.type === "Accelerator" ? "default" : "secondary"}
+                                className={`mr-2 ${
+                                  startup.currentProgram.type === "Accelerator"
+                                    ? "bg-[#1a2332] text-white"
+                                    : "bg-gray-200 text-gray-700"
+                                }`}
+                              >
+                                {startup.currentProgram.type}
+                              </Badge>
+                              <span className="text-gray-600">{startup.currentProgram.cohort}</span>
+                              <ArrowRight className="h-3 w-3 mx-2 text-gray-400" />
+                              <Badge variant="outline" className="text-xs border-gray-300 text-gray-700">
+                                {startup.currentProgram.preStage} → {startup.currentProgram.currentStage}
+                              </Badge>
+                              <Badge className="ml-2 bg-blue-100 text-blue-800 border-blue-200">Current</Badge>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
                     <div className="flex flex-wrap gap-1">
                       {startup.tags.map((tag) => (
                         <Badge key={tag} variant="outline" className="text-xs border-gray-300 text-gray-600">
@@ -322,26 +704,40 @@ export function StartupPortfolio() {
                         <div className="font-medium text-[#1a2332]">{startup.industry}</div>
                       </div>
                       <div>
-                        <div className="text-gray-500">Founded</div>
-                        <div className="font-medium text-[#1a2332]">{startup.founded || "N/A"}</div>
+                        <div className="text-gray-500">
+                          {startup.status === "Alumni"
+                            ? "Graduated"
+                            : startup.status === "Current"
+                              ? "Started"
+                              : "Starts"}
+                        </div>
+                        <div className="font-medium text-[#1a2332]">
+                          {startup.status === "Alumni"
+                            ? startup.programs[startup.programs.length - 1].graduationDate
+                            : startup.currentProgram?.startDate}
+                        </div>
                       </div>
                       <div>
                         <div className="text-gray-500">Team Size</div>
                         <div className="font-medium text-[#1a2332]">
                           <Users className="inline-block h-4 w-4 mr-1" />
-                          {startup.team_size}
+                          {startup.teamSize}
                         </div>
                       </div>
                       <div>
                         <div className="text-gray-500">
-                          {startup.status === "Alumni" && startup.revenue_growth ? "Revenue Growth" : "Status"}
+                          {startup.status === "Alumni"
+                            ? "Revenue Growth"
+                            : startup.status === "Current"
+                              ? "Expected Grad"
+                              : "Expected Grad"}
                         </div>
                         <div
-                          className={`font-medium ${startup.status === "Alumni" && startup.revenue_growth ? "text-[#00ff00]" : "text-[#1a2332]"}`}
+                          className={`font-medium ${startup.status === "Alumni" ? "text-[#00ff00]" : "text-[#1a2332]"}`}
                         >
-                          {startup.status === "Alumni" && startup.revenue_growth
-                            ? `+${startup.revenue_growth}`
-                            : startup.status}
+                          {startup.status === "Alumni"
+                            ? `+${startup.revenueGrowth}`
+                            : startup.currentProgram?.expectedGraduation}
                         </div>
                       </div>
                     </div>
@@ -349,44 +745,42 @@ export function StartupPortfolio() {
                     {startup.status === "Alumni" && startup.testimonial && (
                       <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
                         <p className="text-sm italic mb-2 text-gray-700">"{startup.testimonial}"</p>
-                        {startup.mentor && <p className="text-xs text-gray-500">Mentor: {startup.mentor}</p>}
+                        <p className="text-xs text-gray-500">Mentor: {startup.mentor}</p>
                       </div>
                     )}
 
-                    {startup.status === "Current" && startup.progress_update && (
+                    {startup.status === "Current" && startup.progressUpdate && (
                       <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
                         <p className="text-sm font-medium text-blue-900 mb-1">Current Progress:</p>
-                        <p className="text-sm text-blue-700">{startup.progress_update}</p>
-                        {startup.mentor && <p className="text-xs text-gray-500 mt-2">Mentor: {startup.mentor}</p>}
+                        <p className="text-sm text-blue-700">{startup.progressUpdate}</p>
+                        <p className="text-xs text-gray-500 mt-2">Mentor: {startup.mentor}</p>
                       </div>
                     )}
 
-                    {startup.status === "Nominated" && startup.nomination_reason && (
+                    {startup.status === "Nominated" && startup.nominationReason && (
                       <div className="bg-amber-50 p-3 rounded-lg border border-amber-200">
                         <p className="text-sm font-medium text-amber-900 mb-1">Why We Selected Them:</p>
-                        <p className="text-sm text-amber-700">{startup.nomination_reason}</p>
+                        <p className="text-sm text-amber-700">{startup.nominationReason}</p>
                       </div>
                     )}
 
-                    {startup.website && (
-                      <Button
-                        variant="outline"
-                        className="w-full border-[#1a2332] text-[#1a2332] hover:bg-[#1a2332] hover:text-white"
-                        asChild
-                      >
-                        <a href={startup.website} target="_blank" rel="noopener noreferrer">
-                          <Globe className="h-4 w-4 mr-2" />
-                          Visit Website
-                        </a>
-                      </Button>
-                    )}
+                    <Button
+                      variant="outline"
+                      className="w-full border-[#1a2332] text-[#1a2332] hover:bg-[#1a2332] hover:text-white"
+                      asChild
+                    >
+                      <a href={startup.website} target="_blank" rel="noopener noreferrer">
+                        <Globe className="h-4 w-4 mr-2" />
+                        Visit Website
+                      </a>
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
             ))}
           </div>
 
-          {filteredStartups.length === 0 && !loading && (
+          {filteredStartups.length === 0 && (
             <div className="text-center py-12">
               <div className="text-gray-600 text-lg">No startups found matching your criteria.</div>
               <Button
@@ -396,6 +790,8 @@ export function StartupPortfolio() {
                   setSearchTerm("")
                   setSelectedIndustry("All")
                   setSelectedStage("All")
+                  setSelectedProgram("All")
+                  setSelectedCohort("All")
                   setSelectedStatus("All")
                 }}
               >
